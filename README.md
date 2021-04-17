@@ -1,7 +1,7 @@
-Forked from:
-https://github.com/d3m0n4l3x/eJPT
-https://github.com/fdicarlo/eJPT 
-https://github.com/Kaiser784/eJPT/  
+## Credits [THANK YOU :)]
+- https://github.com/d3m0n4l3x/eJPT
+- https://github.com/fdicarlo/eJPT 
+- https://github.com/Kaiser784/eJPT/  
 
 # PTS course
 ---
