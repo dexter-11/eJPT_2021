@@ -1,3 +1,8 @@
+Forked from:
+https://github.com/d3m0n4l3x/eJPT
+https://github.com/fdicarlo/eJPT 
+https://github.com/Kaiser784/eJPT/  
+
 # PTS course
 ---
 This is a repo I created for organizing the code and writeups for the PTS(Penetration Testing Student) labs.        
