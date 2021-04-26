@@ -227,7 +227,7 @@ Below are some examples of the exam questions that you might have during the tes
 - What’s in the file “test.txt”?
 - How many routers there are in the internal network?
 - Which IP address belongs to Windows machine?
-- There is one machine contains the following file C:\\Windows\secret.txt. What is its content?
+- There is one machine contains the following file C:\\PATH\file.txt. What is its content?
 - What are the hard drives in the Windows machine?
-- What is the IBAN number for the XXXX user?
+- What is the Identity number for the XXXX user?
 - What is your IP address?
