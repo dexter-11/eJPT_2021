@@ -278,39 +278,41 @@ Below are some examples of the exam questions that you might have during the tes
 
 ## USEFUL TOOLS/METHODS DURING PENTEST
 ### Networking
-TCPView tool
-DNS
-ping
-Dataexfil
-PAcketwhisper
-egresscheckframework
+    TCPView tool
+    DNS
+    ping
+    Dataexfil
+    PAcketwhisper
+    egresscheckframework
 
 ### Dirbuster
-/usr/share/dirbuster/wordlists
-Search files ext. example bak old
-DIRB
-Dirb target pathtowordlist
-Dirb -a useragent ||||||||||||||||||| http://www.useragentstring.com/pages/useragentstring.php
-Dirb -p http://127.0.0.1:8080 |||||||||||proxy
-Dirb target -c “Cookie:123”||| if logged in session
-Dirb -u “admin:pass” |||| http authentication
-Dirb -H “”myheader:123” ||| custom header
+    /usr/share/dirbuster/wordlists
+    Search files ext. example bak old
+    DIRB
+    Dirb target pathtowordlist
+    Dirb -a useragent ||||||||||||||||||| http://www.useragentstring.com/pages/useragentstring.php
+    Dirb -p http://127.0.0.1:8080 |||||||||||proxy
+    Dirb target -c “Cookie:123”||| if logged in session
+    Dirb -u “admin:pass” |||| http authentication
+    Dirb -H “”myheader:123” ||| custom header
 
 ### MySQL
+```sql
 mysql -u awdmgmt -pUChxKQk96dVtM07 -h 10.104.11.198
 use dbname;
 show tables;
 select * from tables;
+```
 
 ### MASSCAN
-masscan -p xxx -Pn --rate=xpacets/sec --banners IPS -e tap0 --router-ip x.x.x.x(USED BECAUSE we are
-connected via vpn)
---echo > file.conf -------- saves sacn command in a conf file
-masscan -c file.conf to run file
+    masscan -p xxx -Pn --rate=xpacets/sec --banners IPS -e tap0 --router-ip x.x.x.x(USED BECAUSE we are
+    connected via vpn)
+    --echo > file.conf -------- saves sacn command in a conf file
+    masscan -c file.conf to run file
 
 ### NESSUS
-/etc/init.d/nessusd start
-https://localhost:8834
+    /etc/init.d/nessusd start
+    https://localhost:8834
 
 ### SSH Copy
-scp root@192.168.99.22:/etc/passwd
+    scp root@192.168.99.22:/etc/passwd
